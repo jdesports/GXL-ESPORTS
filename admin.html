@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>GXL Esports Admin</title>
+<style>
+  :root{--bg:#050a12;--card:#0f1826;--accent:#00e5ff;--accent2:#7c4dff;--text:#f2f2f7;--muted:#93a0b4;--green:#22c55e;--gold:#fbbf24;--red:#ef4444;--line:#1e2d42}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at top,#0b2a3d 0%,var(--bg) 55%) fixed;color:var(--text);min-height:100vh;padding-bottom:90px}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  h1{font-size:1.4rem;margin:8px 0 4px}
+  h1 span{color:var(--accent)}
+  h2{font-size:1.05rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+  .muted{color:var(--muted);font-size:.85rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0}
+  label{display:block;font-size:.8rem;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+  input,textarea{width:100%;background:#0a111c;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 12px;font-size:1rem;font-family:inherit}
+  input:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+  textarea{resize:vertical;min-height:44px}
+  button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--accent2),#3b82f6)}
+  button.ghost{background:#1a2638}
+  button.del{background:#3a1420;color:#ff8a9a;padding:8px 12px;flex:none}
+  button:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+  .row .n{color:var(--muted);width:28px;flex:none;text-align:right;font-size:.85rem}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1}
+  .stats{display:flex;gap:10px;margin-top:10px}
+  .stat{flex:1;background:#0a111c;border-radius:10px;padding:10px;text-align:center}
+  .stat b{display:block;font-size:1.3rem}
+  .stat.inv b{color:var(--gold)} .stat.reg b{color:var(--green)} .stat.rem b{color:var(--accent)}
+  #bar{position:fixed;left:0;right:0;bottom:0;background:#0a111c;border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:center}
+  #bar .msg{font-size:.9rem;color:var(--muted)}
+  #bar .msg.ok{color:var(--green)} #bar .msg.err{color:var(--red)} #bar .msg.dirty{color:var(--gold)}
+  .err-box{background:#3a1420;border:1px solid #7a2236;color:#ffb4c0;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:.9rem}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div id="login" class="hidden">
+    <h1>GXL <span>Esports</span> Admin</h1>
+    <p class="muted">One-time setup on this device.</p>
+    <div class="card">
+      <label>GitHub repository (username/repo)</label>
+      <input id="repo" placeholder="myname/my-tournament-site" autocapitalize="off" autocomplete="off">
+      <label>Branch</label>
+      <input id="branch" value="main" autocapitalize="off">
+      <label>GitHub access token (your admin password)</label>
+      <input id="token" type="password" placeholder="github_pat_..." autocomplete="off">
+      <div id="loginErr" class="err-box hidden"></div>
+      <div style="margin-top:14px"><button id="loginBtn">Log in</button></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="app" class="hidden">
+    <div class="top">
+      <h1>GXL <span>Esports</span> Admin</h1>
+      <button class="ghost" id="logoutBtn">Log out</button>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><span class="muted">Total</span><b id="sTotal">0</b></div>
+        <div class="stat inv"><span class="muted">Invited</span><b id="sInv">0</b></div>
+        <div class="stat reg"><span class="muted">Registered</span><b id="sReg">0</b></div>
+        <div class="stat rem"><span class="muted">Open left</span><b id="sRem">0</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Add registered player</h2>
+      <div class="row">
+        <input id="newPlayer" placeholder="Type player / team name and press Add" autocomplete="off">
+        <button id="addPlayerBtn">Add</button>
+      </div>
+      <div id="playerErr" class="err-box hidden"></div>
+      <p class="muted">Added and published straight away.</p>
+    </div>
+
+    <div class="card">
+      <h2>Registered players (free slots)</h2>
+      <div id="players"></div>
+      <p class="muted" id="noPlayers">No players yet.</p>
+    </div>
+
+    <div class="card">
+      <h2>Add invited player</h2>
+      <div class="row">
+        <input id="newInvited" placeholder="Type invited name and press Add" autocomplete="off">
+        <button id="addInvitedBtn">Add</button>
+      </div>
+      <div id="invitedErr" class="err-box hidden"></div>
+    </div>
+
+    <div class="card">
+      <h2>Invited players</h2>
+      <div id="invited"></div>
+      <p class="muted" id="noInvited">No invited players yet.</p>
+    </div>
+
+    <div class="card">
+      <h2>Settings</h2>
+      <label>Invited slots</label>
+      <input id="invitedSlots" type="number" min="0" inputmode="numeric">
+      <label>Registration slots</label>
+      <input id="registrationSlots" type="number" min="0" inputmode="numeric">
+      <label>WhatsApp register link</label>
+      <input id="whatsapp" autocapitalize="off">
+    </div>
+
+    <div class="card">
+      <h2>Tournament details</h2>
+      <div id="details"></div>
+      <button class="ghost" id="addDetail">+ Add detail</button>
+    </div>
+
+    <div class="card">
+      <h2>Rules</h2>
+      <div id="rules"></div>
+      <button class="ghost" id="addRule">+ Add rule</button>
+    </div>
+  </div>
+</div>
+
+<div id="bar" class="hidden">
+  <span class="msg" id="msg">Loaded.</span>
+  <button id="saveBtn">Save changes</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const FILE = "data.json";
+let cfg = null, data = null, dirty = false, busy = false;
+
+try { cfg = JSON.parse(localStorage.getItem("gxl_admin") || "null"); } catch (e) {}
+
+/* ---------- GitHub helpers ---------- */
+function gh(method, body) {
+  const url = "https://api.github.com/repos/" + cfg.repo + "/contents/" + FILE +
+              (method === "GET" ? "?ref=" + encodeURIComponent(cfg.branch) + "&t=" + Date.now() : "");
+  return fetch(url, {
+    method, cache: "no-store",
+    headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + cfg.token, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined
+  });
+}
+function decode(b64) {
+  const bin = atob(b64.replace(/\s/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function encode(text) {
+  let s = "";
+  new TextEncoder().encode(text).forEach(b => s += String.fromCharCode(b));
+  return btoa(s);
+}
+async function explain(res) {
+  if (res.status === 401) return "Wrong or expired token.";
+  if (res.status === 403) return "Token has no permission (needs Contents: Read and write).";
+  if (res.status === 404) return "Repo or data.json not found. Check the repo name, branch, and that data.json is uploaded.";
+  if (res.status === 409 || res.status === 422) return "Out of date. Refresh the page and try again.";
+  return "GitHub error " + res.status;
+}
+
+/* ---------- Load / Save ---------- */
+async function load() {
+  const res = await gh("GET");
+  if (!res.ok) throw new Error(await explain(res));
+  const j = await res.json();
+  data = JSON.parse(decode(j.content));
+  data.players = data.players || []; data.invited = data.invited || [];
+  data.details = data.details || []; data.rules = data.rules || [];
+  data.invitedSlots = Number(data.invitedSlots) || 0;
+  data.registrationSlots = Number(data.registrationSlots) || 0;
+}
+
+async function save() {
+  if (busy) return false;
+  busy = true; setMsg("Saving...", ""); $("saveBtn").disabled = true;
+  try {
+    const cur = await gh("GET");
+    if (!cur.ok) throw new Error(await explain(cur));
+    const sha = (await cur.json()).sha;
+    const out = await gh("PUT", {
+      message: "Admin update " + new Date().toISOString(),
+      content: encode(JSON.stringify(data, null, 2) + "\n"),
+      sha, branch: cfg.branch
+    });
+    if (!out.ok) throw new Error(await explain(out));
+    dirty = false;
+    setMsg("Saved. Live in about 1 minute.", "ok");
+    return true;
+  } catch (e) {
+    setMsg(e.message || "Save failed", "err");
+    return false;
+  } finally { busy = false; $("saveBtn").disabled = false; }
+}
+
+function setMsg(t, cls) { const m = $("msg"); m.textContent = t; m.className = "msg " + (cls || ""); }
+function markDirty() { dirty = true; setMsg("Unsaved changes", "dirty"); }
+
+/* ---------- Render ---------- */
+function stats() {
+  const inv = data.invitedSlots, reg = data.registrationSlots;
+  $("sTotal").textContent = inv + reg;
+  $("sInv").textContent = data.invited.length + "/" + inv;
+  $("sReg").textContent = data.players.length + "/" + reg;
+  $("sRem").textContent = Math.max(reg - data.players.length, 0);
+  $("noPlayers").classList.toggle("hidden", data.players.length > 0);
+  $("noInvited").classList.toggle("hidden", data.invited.length > 0);
+}
+function mkDel(fn) { const b = document.createElement("button"); b.className = "del"; b.textContent = "✕"; b.title = "Remove"; b.onclick = fn; return b; }
+
+function renderNames(key, boxId) {
+  const box = $(boxId); box.innerHTML = "";
+  data[key].forEach((name, i) => {
+    const row = document.createElement("div"); row.className = "row";
+    const n = document.createElement("span"); n.className = "n"; n.textContent = (i + 1) + ".";
+    const inp = document.createElement("input"); inp.value = name;
+    inp.oninput = () => { data[key][i] = inp.value; markDirty(); };
+    row.append(n, inp, mkDel(() => {
+      if (!confirm("Remove " + (data[key][i] || "this entry") + "?")) return;
+      data[key].splice(i, 1); renderNames(key, boxId); markDirty();
+    }));
+    box.appendChild(row);
+  });
+  stats();
+}
+function renderDetails() {
+  const box = $("details"); box.innerHTML = "";
+  data.details.forEach((d, i) => {
+    const row = document.createElement("div"); row.className = "row";
+    const two = document.createElement("div"); two.className = "two";
+    const l = document.createElement("input"); l.value = d.label; l.placeholder = "Label";
+    const v = document.createElement("input"); v.value = d.value; v.placeholder = "Value";
+    l.oninput = () => { d.label = l.value; markDirty(); };
+    v.oninput = () => { d.value = v.value; markDirty(); };
+    two.append(l, v);
+    row.append(two, mkDel(() => { data.details.splice(i, 1); renderDetails(); markDirty(); }));
+    box.appendChild(row);
+  });
+}
+function renderRules() {
+  const box = $("rules"); box.innerHTML = "";
+  data.rules.forEach((r, i) => {
+    const row = document.createElement("div"); row.className = "row";
+    const t = document.createElement("textarea"); t.value = r; t.rows = 1;
+    t.oninput = () => { data.rules[i] = t.value; markDirty(); };
+    row.append(t, mkDel(() => { data.rules.splice(i, 1); renderRules(); markDirty(); }));
+    box.appendChild(row);
+  });
+}
+function renderAll() {
+  renderNames("players", "players"); renderNames("invited", "invited");
+  renderDetails(); renderRules();
+  $("invitedSlots").value = data.invitedSlots;
+  $("registrationSlots").value = data.registrationSlots;
+  $("whatsapp").value = data.whatsappLink || "";
+}
+
+/* ---------- Events ---------- */
+async function addName(key, inputId, errId, boxId, maxKey, fullMsg) {
+  const err = $(errId); err.classList.add("hidden");
+  const name = $(inputId).value.trim();
+  if (!name) return;
+  const all = data.players.concat(data.invited);
+  if (all.some(p => p.trim().toLowerCase() === name.toLowerCase())) {
+    err.textContent = "\"" + name + "\" is already in the list."; err.classList.remove("hidden"); return;
+  }
+  if (data[key].length >= data[maxKey]) {
+    err.textContent = fullMsg; err.classList.remove("hidden"); return;
+  }
+  data[key].push(name); $(inputId).value = ""; renderNames(key, boxId);
+  await save();
+  $(inputId).focus();
+}
+$("addPlayerBtn").onclick = () => addName("players", "newPlayer", "playerErr", "players", "registrationSlots", "All registration slots are full. Increase Registration slots first.");
+$("addInvitedBtn").onclick = () => addName("invited", "newInvited", "invitedErr", "invited", "invitedSlots", "All invited slots are full. Increase Invited slots first.");
+$("newPlayer").addEventListener("keydown", e => { if (e.key === "Enter") $("addPlayerBtn").click(); });
+$("newInvited").addEventListener("keydown", e => { if (e.key === "Enter") $("addInvitedBtn").click(); });
+
+$("invitedSlots").oninput = e => { data.invitedSlots = Number(e.target.value) || 0; stats(); markDirty(); };
+$("registrationSlots").oninput = e => { data.registrationSlots = Number(e.target.value) || 0; stats(); markDirty(); };
+$("whatsapp").oninput = e => { data.whatsappLink = e.target.value.trim(); markDirty(); };
+$("addDetail").onclick = () => { data.details.push({ label: "", value: "" }); renderDetails(); markDirty(); };
+$("addRule").onclick = () => { data.rules.push(""); renderRules(); markDirty(); };
+$("saveBtn").onclick = () => {
+  data.players = data.players.map(p => p.trim()).filter(Boolean);
+  data.invited = data.invited.map(p => p.trim()).filter(Boolean);
+  data.rules = data.rules.map(r => r.trim()).filter(Boolean);
+  data.details = data.details.filter(d => d.label.trim() || d.value.trim());
+  renderAll(); save();
+};
+$("logoutBtn").onclick = () => {
+  if (dirty && !confirm("You have unsaved changes. Log out anyway?")) return;
+  localStorage.removeItem("gxl_admin"); location.reload();
+};
+window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+$("loginBtn").onclick = async () => {
+  const e = $("loginErr"); e.classList.add("hidden");
+  cfg = { repo: $("repo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, ""),
+          branch: $("branch").value.trim() || "main", token: $("token").value.trim() };
+  if (!/^[^\/\s]+\/[^\/\s]+$/.test(cfg.repo) || !cfg.token) {
+    e.textContent = "Enter the repo as username/repo and paste your token."; e.classList.remove("hidden"); return;
+  }
+  $("loginBtn").disabled = true;
+  try { await load(); localStorage.setItem("gxl_admin", JSON.stringify(cfg)); start(); }
+  catch (err) { e.textContent = err.message; e.classList.remove("hidden"); }
+  $("loginBtn").disabled = false;
+};
+
+function start() {
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden"); $("bar").classList.remove("hidden");
+  renderAll(); setMsg("Loaded.", "ok");
+}
+
+(async function init() {
+  if (cfg && cfg.token) {
+    try { await load(); start(); return; }
+    catch (err) { $("loginErr").textContent = err.message; $("loginErr").classList.remove("hidden"); }
+  }
+  if (cfg) { $("repo").value = cfg.repo || ""; $("branch").value = cfg.branch || "main"; }
+  $("login").classList.remove("hidden");
+})();
+</script>
+</body>
+</html>

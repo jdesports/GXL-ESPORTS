@@ -1,0 +1,26 @@
+{
+  "whatsappLink": "https://wa.me/91XXXXXXXXXX?text=Hi%20GXL%20Esports%2C%20I%20want%20to%20register%20for%20the%20Free%20Fire%20MAX%20tournament",
+  "invitedSlots": 12,
+  "registrationSlots": 36,
+  "invited": [],
+  "players": [],
+  "details": [
+    { "label": "Game", "value": "Free Fire MAX" },
+    { "label": "Mode", "value": "BR Full Map" },
+    { "label": "Date", "value": "To be announced" },
+    { "label": "Time", "value": "To be announced" },
+    { "label": "Entry Fee", "value": "Free" },
+    { "label": "Prize Pool", "value": "Rs. 1000" },
+    { "label": "1st Prize", "value": "Rs. 500" },
+    { "label": "2nd Prize", "value": "Rs. 350" },
+    { "label": "3rd Prize", "value": "Rs. 150" }
+  ],
+  "rules": [
+    "Total 48 slots: 12 are invite-only and 36 are open for free registration.",
+    "Registration is only through WhatsApp.",
+    "Registration slots are filled on a first come, first served basis.",
+    "Hackers / cheaters will be disqualified immediately.",
+    "Join the room on time. Late players will not be allowed.",
+    "Admin's decision is final."
+  ]
+}
