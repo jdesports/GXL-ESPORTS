@@ -5,15 +5,42 @@
   "invited": [],
   "players": [],
   "details": [
-    { "label": "Game", "value": "Free Fire MAX" },
-    { "label": "Mode", "value": "BR Full Map" },
-    { "label": "Date", "value": "To be announced" },
-    { "label": "Time", "value": "To be announced" },
-    { "label": "Entry Fee", "value": "Free" },
-    { "label": "Prize Pool", "value": "Rs. 1000" },
-    { "label": "1st Prize", "value": "Rs. 500" },
-    { "label": "2nd Prize", "value": "Rs. 350" },
-    { "label": "3rd Prize", "value": "Rs. 150" }
+    {
+      "label": "Game",
+      "value": "Free Fire MAX"
+    },
+    {
+      "label": "Mode",
+      "value": "BR Full Map"
+    },
+    {
+      "label": "Date",
+      "value": "To be announced"
+    },
+    {
+      "label": "Time",
+      "value": "To be announced"
+    },
+    {
+      "label": "Entry Fee",
+      "value": "Free"
+    },
+    {
+      "label": "Prize Pool",
+      "value": "Rs. 1000"
+    },
+    {
+      "label": "1st Prize",
+      "value": "Rs. 500"
+    },
+    {
+      "label": "2nd Prize",
+      "value": "Rs. 350"
+    },
+    {
+      "label": "3rd Prize",
+      "value": "Rs. 150"
+    }
   ],
   "rules": [
     "Total 48 slots: 12 are invite-only and 36 are open for free registration.",
